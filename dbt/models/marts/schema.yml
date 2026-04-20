@@ -52,3 +52,56 @@ models:
         tests: [not_null]
       - name: channel
         tests: [not_null]
+
+  - name: fct_mixpanel_events
+    description: >
+      Daily Mixpanel event fact table — one row per event_name/channel/campaign/country/device/date.
+      KPIs: event_count, unique_users, events_per_user.
+    columns:
+      - name: event_date
+        tests: [not_null]
+      - name: event_name
+        tests: [not_null]
+      - name: channel_normalized
+        tests: [not_null]
+      - name: event_count
+        tests: [{dbt_utils.accepted_range: {min_value: 0}}]
+      - name: unique_users
+        tests: [{dbt_utils.accepted_range: {min_value: 0}}]
+      - name: events_per_user
+        tests: [{dbt_utils.accepted_range: {min_value: 0}}]
+
+  - name: fct_mixpanel_funnel
+    description: >
+      Mixpanel funnel step conversion fact table — one row per funnel/step/date.
+      KPIs: step_conversion_rate, cumulative_drop_off_rate, avg_time_to_convert_hrs,
+      overall_funnel_conversion_rate.
+    columns:
+      - name: date
+        tests: [not_null]
+      - name: funnel_id
+        tests: [not_null]
+      - name: step_index
+        tests: [not_null]
+      - name: step_conversion_rate
+        tests: [{dbt_utils.accepted_range: {min_value: 0, max_value: 1}}]
+      - name: cumulative_drop_off_rate
+        tests: [{dbt_utils.accepted_range: {min_value: 0, max_value: 1}}]
+      - name: overall_funnel_conversion_rate
+        tests: [{dbt_utils.accepted_range: {min_value: 0, max_value: 1}}]
+
+  - name: fct_mixpanel_campaign_attribution
+    description: >
+      Joins Mixpanel UTM event data with ad spend for cross-channel attribution.
+      Provides Mixpanel-attributed CPA and funnel conversion rates by campaign.
+    columns:
+      - name: event_date
+        tests: [not_null]
+      - name: channel_normalized
+        tests: [not_null]
+      - name: orders
+        tests: [{dbt_utils.accepted_range: {min_value: 0}}]
+      - name: cart_to_checkout_rate
+        tests: [{dbt_utils.accepted_range: {min_value: 0, max_value: 1}}]
+      - name: checkout_to_order_rate
+        tests: [{dbt_utils.accepted_range: {min_value: 0, max_value: 1}}]

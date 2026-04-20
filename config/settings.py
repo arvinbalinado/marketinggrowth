@@ -111,6 +111,25 @@ class LinkedInAdsConfig:
     )
 
 
+# ── Mixpanel ─────────────────────────────────────────────────────────────────
+@dataclass(frozen=True)
+class MixpanelConfig:
+    project_id: str = field(default_factory=lambda: os.getenv("MIXPANEL_PROJECT_ID", ""))
+    service_account_username: str = field(
+        default_factory=lambda: os.getenv("MIXPANEL_SERVICE_ACCOUNT_USERNAME", "")
+    )
+    service_account_secret: str = field(
+        default_factory=lambda: os.getenv("MIXPANEL_SERVICE_ACCOUNT_SECRET", "")
+    )
+    # Optional: used when exporting raw events via the Data Export API
+    api_secret: str = field(
+        default_factory=lambda: os.getenv("MIXPANEL_API_SECRET", "")
+    )
+    region: str = field(
+        default_factory=lambda: os.getenv("MIXPANEL_REGION", "US")  # US or EU
+    )
+
+
 # ── Slack Alerts ──────────────────────────────────────────────────────────────
 @dataclass(frozen=True)
 class SlackConfig:
@@ -143,6 +162,7 @@ class Settings:
     salesforce: SalesforceConfig = field(default_factory=SalesforceConfig)
     shopify: ShopifyConfig = field(default_factory=ShopifyConfig)
     linkedin_ads: LinkedInAdsConfig = field(default_factory=LinkedInAdsConfig)
+    mixpanel: MixpanelConfig = field(default_factory=MixpanelConfig)
     slack: SlackConfig = field(default_factory=SlackConfig)
     pipeline: PipelineConfig = field(default_factory=PipelineConfig)
 

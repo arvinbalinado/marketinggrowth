@@ -41,6 +41,8 @@ class MarketingDataValidator:
             self.check_funnel_stage_order(execution_date),
             self.check_revenue_not_negative(execution_date),
             self.check_duplicate_campaign_rows(execution_date),
+            self.check_mixpanel_event_counts(execution_date),
+            self.check_no_future_mixpanel_events(execution_date),
         ]
         failed = [c for c in checks if not c.passed]
         logger.info(
@@ -150,6 +152,48 @@ class MarketingDataValidator:
         return self._run_count_check(
             "no_duplicate_campaign_rows",
             "fct_campaign_performance",
+            sql,
+            expected_count=0,
+        )
+
+    def check_mixpanel_event_counts(self, execution_date: str) -> CheckResult:
+        """Ensure at least 50 Mixpanel events were loaded for the execution date."""
+        sql = f"""
+        SELECT COUNT(*) as event_count
+        FROM `{{project}}.raw.mixpanel_events`
+        WHERE event_date = '{execution_date}'
+        """
+        try:
+            from config.settings import get_settings
+
+            project = get_settings().bigquery.project_id
+            resolved_sql = sql.replace("{project}", project)
+            df = self._loader.run_query(resolved_sql)
+            count = int(df["event_count"].iloc[0]) if not df.empty else 0
+            return CheckResult(
+                check_name="mixpanel_minimum_event_count",
+                table="mixpanel_events",
+                passed=(count >= 50),
+                details={"event_count": count, "minimum": 50},
+            )
+        except Exception as exc:  # noqa: BLE001
+            return CheckResult(
+                check_name="mixpanel_minimum_event_count",
+                table="mixpanel_events",
+                passed=False,
+                error=str(exc),
+            )
+
+    def check_no_future_mixpanel_events(self, execution_date: str) -> CheckResult:
+        """Flag any Mixpanel events timestamped in the future (clock skew / bad data)."""
+        sql = f"""
+        SELECT COUNT(*) as bad_rows
+        FROM `{{project}}.raw.mixpanel_events`
+        WHERE event_date > '{execution_date}'
+        """
+        return self._run_count_check(
+            "no_future_mixpanel_events",
+            "mixpanel_events",
             sql,
             expected_count=0,
         )

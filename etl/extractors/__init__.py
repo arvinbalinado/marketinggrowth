@@ -6,6 +6,11 @@ from etl.extractors.hubspot_extractor import HubSpotExtractor
 from etl.extractors.salesforce_extractor import SalesforceExtractor
 from etl.extractors.shopify_extractor import ShopifyExtractor
 from etl.extractors.linkedin_ads_extractor import LinkedInAdsExtractor
+from etl.extractors.mixpanel_extractor import (
+    MixpanelEventExtractor,
+    MixpanelSegmentExtractor,
+    MixpanelFunnelExtractor,
+)
 
 __all__ = [
     "BaseExtractor",
@@ -17,4 +22,7 @@ __all__ = [
     "SalesforceExtractor",
     "ShopifyExtractor",
     "LinkedInAdsExtractor",
+    "MixpanelEventExtractor",
+    "MixpanelSegmentExtractor",
+    "MixpanelFunnelExtractor",
 ]

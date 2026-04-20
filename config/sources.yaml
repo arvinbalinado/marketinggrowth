@@ -157,6 +157,60 @@ sources:
       - conversions
       - videoViews
 
+  mixpanel:
+    enabled: true
+    raw_table: mixpanel_events
+    lookback_days: 7      # Mixpanel late-arriving events window
+    # Raw event export (Data Export API)
+    event_export:
+      enabled: true
+      raw_table: mixpanel_events
+    # Segmentation queries (Query API — aggregated)
+    segmentation:
+      enabled: true
+      raw_table: mixpanel_segmentation
+      events_to_track:
+        - Signed Up
+        - Logged In
+        - Page Viewed
+        - Campaign Clicked
+        - Add to Cart
+        - Checkout Started
+        - Order Completed
+        - Lead Form Submitted
+        - Demo Requested
+        - Feature Used
+      segment_by:
+        - $city
+        - $country_code
+        - $os
+        - $browser
+        - utm_source
+        - utm_medium
+        - utm_campaign
+        - utm_content
+    # Funnel definitions (must match Mixpanel project funnels)
+    funnels:
+      enabled: true
+      raw_table: mixpanel_funnel_conversions
+      funnel_definitions:
+        acquisition_funnel:
+          steps:
+            - Page Viewed
+            - Signed Up
+            - Feature Used
+        purchase_funnel:
+          steps:
+            - Page Viewed
+            - Add to Cart
+            - Checkout Started
+            - Order Completed
+        lead_gen_funnel:
+          steps:
+            - Page Viewed
+            - Lead Form Submitted
+            - Demo Requested
+
 # BigQuery dataset structure
 datasets:
   raw:

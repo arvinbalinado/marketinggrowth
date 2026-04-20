@@ -41,6 +41,24 @@ sources:
         freshness:
           warn_after: {count: 6, period: hour}
           error_after: {count: 24, period: hour}
+      - name: mixpanel_events
+        description: "Raw Mixpanel event export via Data Export API (NDJSON)"
+        loaded_at_field: _extracted_at
+        freshness:
+          warn_after: {count: 12, period: hour}
+          error_after: {count: 24, period: hour}
+      - name: mixpanel_segmentation
+        description: "Raw Mixpanel aggregated segmentation metrics via Query API"
+        loaded_at_field: _extracted_at
+        freshness:
+          warn_after: {count: 12, period: hour}
+          error_after: {count: 24, period: hour}
+      - name: mixpanel_funnel_conversions
+        description: "Raw Mixpanel funnel step conversion data via Funnels API"
+        loaded_at_field: _extracted_at
+        freshness:
+          warn_after: {count: 24, period: hour}
+          error_after: {count: 48, period: hour}
 
 models:
   - name: stg_google_ads
@@ -87,4 +105,42 @@ models:
       - name: order_id
         tests: [not_null, unique]
       - name: gross_revenue
+        tests: [{dbt_utils.accepted_range: {min_value: 0}}]
+
+  - name: stg_mixpanel_events
+    description: "Cleaned Mixpanel events — one row per event with UTM, device, and geo fields"
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+      - name: event_name
+        tests: [not_null]
+      - name: distinct_id
+        tests: [not_null]
+      - name: event_date
+        tests: [not_null]
+      - name: channel_normalized
+        tests:
+          - accepted_values:
+              values: ['paid_search', 'paid_social', 'email', 'organic', 'direct', 'other']
+
+  - name: stg_mixpanel_segmentation
+    description: "Cleaned Mixpanel segmentation metrics — one row per event/segment/date"
+    columns:
+      - name: event
+        tests: [not_null]
+      - name: date
+        tests: [not_null]
+      - name: event_count
+        tests: [{dbt_utils.accepted_range: {min_value: 0}}]
+
+  - name: stg_mixpanel_funnels
+    description: "Cleaned Mixpanel funnel step data with conversion times"
+    columns:
+      - name: funnel_id
+        tests: [not_null]
+      - name: date
+        tests: [not_null]
+      - name: step_index
+        tests: [not_null]
+      - name: users_entered
         tests: [{dbt_utils.accepted_range: {min_value: 0}}]

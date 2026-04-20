@@ -22,12 +22,16 @@ FRESHNESS_THRESHOLDS = {
     "raw.ga4_sessions": 6,
     "raw.hubspot_objects": 12,
     "raw.shopify_raw": 6,
+    "raw.mixpanel_events": 12,
+    "raw.mixpanel_segmentation": 12,
+    "raw.mixpanel_funnel_conversions": 24,
 }
 
 ROW_COUNT_MINIMUMS = {
     "raw.google_ads_campaigns": 10,
     "raw.meta_ads_insights": 10,
     "raw.ga4_sessions": 100,
+    "raw.mixpanel_events": 50,
 }
 
 NULL_RATE_MAXIMUMS = {

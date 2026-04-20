@@ -19,6 +19,9 @@ from etl.extractors import (
     GoogleAnalyticsExtractor,
     HubSpotExtractor,
     ShopifyExtractor,
+    MixpanelEventExtractor,
+    MixpanelSegmentExtractor,
+    MixpanelFunnelExtractor,
 )
 from etl.transformers import CampaignTransformer
 from etl.loaders import BigQueryLoader
@@ -66,6 +69,24 @@ SOURCE_MAP = {
         "transformer": None,
         "table": "shopify_raw",
         "merge_keys": ["order_id", "object_type"],
+    },
+    "mixpanel_events": {
+        "extractor": lambda: MixpanelEventExtractor(),
+        "transformer": None,
+        "table": "mixpanel_events",
+        "merge_keys": ["insert_id", "event_date"],
+    },
+    "mixpanel_segments": {
+        "extractor": lambda: MixpanelSegmentExtractor(),
+        "transformer": None,
+        "table": "mixpanel_segmentation",
+        "merge_keys": ["event", "segment_property", "segment_value", "date"],
+    },
+    "mixpanel_funnels": {
+        "extractor": lambda: MixpanelFunnelExtractor(),
+        "transformer": None,
+        "table": "mixpanel_funnel_conversions",
+        "merge_keys": ["funnel_id", "date", "step_index"],
     },
 }
 
