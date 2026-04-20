@@ -1,0 +1,58 @@
+name: marketing_growth_analytics
+version: "1.0"
+config-version: 2
+
+profile: marketing_growth
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  marketing_growth_analytics:
+    staging:
+      +materialized: view
+      +schema: staging
+      +tags: ["staging"]
+    intermediate:
+      +materialized: ephemeral
+      +tags: ["intermediate"]
+    marts:
+      +materialized: table
+      marketing:
+        +schema: marts
+        +tags: ["marketing", "marts"]
+        +partition_by:
+          field: date
+          data_type: date
+          granularity: day
+      growth:
+        +schema: marts
+        +tags: ["growth", "marts"]
+        +partition_by:
+          field: date
+          data_type: date
+          granularity: day
+      revenue:
+        +schema: marts
+        +tags: ["revenue", "marts"]
+        +partition_by:
+          field: date
+          data_type: date
+          granularity: day
+
+vars:
+  # Default lookback for incremental models
+  start_date: "2024-01-01"
+  # Attribution window in days
+  attribution_window_days: 30
+  # Minimum spend to include in ROAS calculations
+  min_spend_threshold: 0.01

@@ -1,0 +1,68 @@
+name: dbt Production Run
+
+on:
+  schedule:
+    - cron: "0 8 * * *"   # 08:00 UTC daily — after all Airflow ingestion DAGs
+  workflow_dispatch:
+    inputs:
+      select:
+        description: "dbt select expression (default: all models)"
+        default: ""
+        required: false
+
+jobs:
+  dbt-run:
+    name: dbt Run & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dbt
+        run: pip install dbt-bigquery==1.8.2
+
+      - name: Install dbt packages
+        working-directory: dbt
+        run: dbt deps
+
+      - name: Write service account key
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+        run: echo "$GCP_SA_KEY" > /tmp/sa_key.json
+
+      - name: dbt run
+        working-directory: dbt
+        env:
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GCP_REGION: ${{ secrets.GCP_REGION }}
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/sa_key.json
+          BIGQUERY_DATASET_RAW: raw
+          BIGQUERY_DATASET_STAGING: staging
+          BIGQUERY_DATASET_MARTS: marts
+        run: |
+          SELECT="${{ github.event.inputs.select }}"
+          if [ -n "$SELECT" ]; then
+            dbt run --select "$SELECT" --profiles-dir . --target production
+          else
+            dbt run --profiles-dir . --target production
+          fi
+
+      - name: dbt test
+        working-directory: dbt
+        env:
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GCP_REGION: ${{ secrets.GCP_REGION }}
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/sa_key.json
+          BIGQUERY_DATASET_RAW: raw
+          BIGQUERY_DATASET_STAGING: staging
+          BIGQUERY_DATASET_MARTS: marts
+        run: dbt test --profiles-dir . --target production
+
+      - name: Clean up key
+        if: always()
+        run: rm -f /tmp/sa_key.json

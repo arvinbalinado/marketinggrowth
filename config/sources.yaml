@@ -1,0 +1,177 @@
+# Pipeline source definitions — used by extractors and loaders
+# to discover table targets, API endpoints, and field mappings.
+
+sources:
+  google_ads:
+    enabled: true
+    raw_table: google_ads_campaigns
+    date_field: segments.date
+    lookback_days: 30
+    metrics:
+      - metrics.impressions
+      - metrics.clicks
+      - metrics.cost_micros
+      - metrics.conversions
+      - metrics.conversions_value
+      - metrics.video_views
+    dimensions:
+      - campaign.id
+      - campaign.name
+      - campaign.status
+      - ad_group.id
+      - ad_group.name
+      - segments.date
+      - segments.device
+
+  meta_ads:
+    enabled: true
+    raw_table: meta_ads_insights
+    date_field: date_start
+    lookback_days: 30
+    fields:
+      - campaign_id
+      - campaign_name
+      - adset_id
+      - adset_name
+      - ad_id
+      - ad_name
+      - date_start
+      - date_stop
+      - impressions
+      - clicks
+      - spend
+      - reach
+      - frequency
+      - actions
+      - cost_per_action_type
+    breakdowns:
+      - age
+      - gender
+      - device_platform
+
+  google_analytics_4:
+    enabled: true
+    raw_table: ga4_sessions
+    date_field: date
+    lookback_days: 30
+    dimensions:
+      - date
+      - sessionSource
+      - sessionMedium
+      - sessionCampaignName
+      - deviceCategory
+      - country
+      - landingPage
+    metrics:
+      - sessions
+      - activeUsers
+      - newUsers
+      - bounceRate
+      - averageSessionDuration
+      - screenPageViews
+      - conversions
+      - totalRevenue
+
+  hubspot:
+    enabled: true
+    objects:
+      contacts:
+        raw_table: hubspot_contacts
+        properties:
+          - email
+          - firstname
+          - lastname
+          - lifecyclestage
+          - hs_lead_status
+          - createdate
+          - lastmodifieddate
+          - hubspot_owner_id
+          - hs_analytics_source
+          - hs_analytics_source_data_1
+      deals:
+        raw_table: hubspot_deals
+        properties:
+          - dealname
+          - amount
+          - dealstage
+          - closedate
+          - createdate
+          - pipeline
+          - hubspot_owner_id
+          - hs_deal_stage_probability
+      companies:
+        raw_table: hubspot_companies
+        properties:
+          - name
+          - domain
+          - industry
+          - annualrevenue
+          - numberofemployees
+          - lifecyclestage
+
+  salesforce:
+    enabled: false
+    objects:
+      leads:
+        raw_table: salesforce_leads
+        soql_fields:
+          - Id
+          - FirstName
+          - LastName
+          - Email
+          - LeadSource
+          - Status
+          - CreatedDate
+          - LastModifiedDate
+          - OwnerId
+      opportunities:
+        raw_table: salesforce_opportunities
+        soql_fields:
+          - Id
+          - Name
+          - Amount
+          - StageName
+          - CloseDate
+          - CreatedDate
+          - LeadSource
+          - OwnerId
+
+  shopify:
+    enabled: true
+    raw_tables:
+      orders: shopify_orders
+      customers: shopify_customers
+      products: shopify_products
+    lookback_days: 30
+
+  linkedin_ads:
+    enabled: true
+    raw_table: linkedin_ads_analytics
+    lookback_days: 30
+    fields:
+      - dateRange
+      - impressions
+      - clicks
+      - costInLocalCurrency
+      - oneClickLeads
+      - conversions
+      - videoViews
+
+# BigQuery dataset structure
+datasets:
+  raw:
+    description: "Unmodified data as pulled from source APIs"
+    partition_expiry_days: 365
+  staging:
+    description: "Cleaned, typed, and renamed source data"
+    partition_expiry_days: 180
+  marts:
+    description: "Business-ready aggregated models"
+    partition_expiry_days: null   # retain indefinitely
+
+# KPI alert thresholds (used by monitoring layer)
+alerts:
+  ctr_min: 0.005          # 0.5% minimum CTR before alert
+  roas_min: 1.0           # Minimum ROAS before alert
+  data_freshness_hours: 4 # Alert if data older than N hours
+  null_rate_max: 0.05     # Alert if null rate exceeds 5%

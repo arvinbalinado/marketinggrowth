@@ -1,0 +1,22 @@
+{
+  "description": "BigQuery schema for raw Meta Ads Insights table",
+  "table": "meta_ads_insights",
+  "fields": [
+    {"name": "campaign_id",    "type": "STRING",    "mode": "REQUIRED"},
+    {"name": "campaign_name",  "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "adset_id",       "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "adset_name",     "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "ad_id",          "type": "STRING",    "mode": "REQUIRED"},
+    {"name": "ad_name",        "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "date_start",     "type": "DATE",      "mode": "REQUIRED"},
+    {"name": "impressions",    "type": "INTEGER",   "mode": "NULLABLE"},
+    {"name": "clicks",         "type": "INTEGER",   "mode": "NULLABLE"},
+    {"name": "spend",          "type": "FLOAT",     "mode": "NULLABLE"},
+    {"name": "reach",          "type": "INTEGER",   "mode": "NULLABLE"},
+    {"name": "frequency",      "type": "FLOAT",     "mode": "NULLABLE"},
+    {"name": "objective",      "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "buying_type",    "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "_extracted_at",  "type": "TIMESTAMP", "mode": "NULLABLE"},
+    {"name": "_source",        "type": "STRING",    "mode": "NULLABLE"}
+  ]
+}

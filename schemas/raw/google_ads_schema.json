@@ -1,0 +1,26 @@
+{
+  "description": "BigQuery schema for raw Google Ads campaign performance table",
+  "table": "google_ads_campaigns",
+  "fields": [
+    {"name": "campaign_id",            "type": "STRING",    "mode": "REQUIRED"},
+    {"name": "campaign_name",          "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "campaign_status",        "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "channel_type",           "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "ad_group_id",            "type": "STRING",    "mode": "REQUIRED"},
+    {"name": "ad_group_name",          "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "ad_group_status",        "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "date",                   "type": "DATE",      "mode": "REQUIRED"},
+    {"name": "device",                 "type": "STRING",    "mode": "NULLABLE"},
+    {"name": "impressions",            "type": "INTEGER",   "mode": "NULLABLE"},
+    {"name": "clicks",                 "type": "INTEGER",   "mode": "NULLABLE"},
+    {"name": "cost",                   "type": "FLOAT",     "mode": "NULLABLE"},
+    {"name": "conversions",            "type": "FLOAT",     "mode": "NULLABLE"},
+    {"name": "conversion_value",       "type": "FLOAT",     "mode": "NULLABLE"},
+    {"name": "video_views",            "type": "INTEGER",   "mode": "NULLABLE"},
+    {"name": "ctr",                    "type": "FLOAT",     "mode": "NULLABLE"},
+    {"name": "average_cpc",            "type": "FLOAT",     "mode": "NULLABLE"},
+    {"name": "search_impression_share","type": "FLOAT",     "mode": "NULLABLE"},
+    {"name": "_extracted_at",          "type": "TIMESTAMP", "mode": "NULLABLE"},
+    {"name": "_source",                "type": "STRING",    "mode": "NULLABLE"}
+  ]
+}

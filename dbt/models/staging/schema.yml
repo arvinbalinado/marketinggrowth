@@ -1,0 +1,90 @@
+version: 2
+
+sources:
+  - name: raw
+    database: "{{ env_var('GCP_PROJECT_ID') }}"
+    schema: "{{ env_var('BIGQUERY_DATASET_RAW', 'raw') }}"
+    tables:
+      - name: google_ads_campaigns
+        description: "Raw Google Ads campaign/ad-group performance data"
+        loaded_at_field: _extracted_at
+        freshness:
+          warn_after: {count: 6, period: hour}
+          error_after: {count: 24, period: hour}
+      - name: meta_ads_insights
+        description: "Raw Meta Ads Insights at ad level"
+        loaded_at_field: _extracted_at
+        freshness:
+          warn_after: {count: 6, period: hour}
+          error_after: {count: 24, period: hour}
+      - name: ga4_sessions
+        description: "Raw Google Analytics 4 session data"
+        loaded_at_field: _extracted_at
+        freshness:
+          warn_after: {count: 6, period: hour}
+          error_after: {count: 24, period: hour}
+      - name: hubspot_objects
+        description: "Raw HubSpot CRM objects (contacts, deals, companies)"
+        loaded_at_field: _extracted_at
+        freshness:
+          warn_after: {count: 12, period: hour}
+          error_after: {count: 48, period: hour}
+      - name: shopify_raw
+        description: "Raw Shopify orders and customer records"
+        loaded_at_field: _extracted_at
+        freshness:
+          warn_after: {count: 6, period: hour}
+          error_after: {count: 24, period: hour}
+      - name: linkedin_ads_analytics
+        description: "Raw LinkedIn Ads campaign analytics"
+        loaded_at_field: _extracted_at
+        freshness:
+          warn_after: {count: 6, period: hour}
+          error_after: {count: 24, period: hour}
+
+models:
+  - name: stg_google_ads
+    description: "Cleaned Google Ads campaign performance, one row per campaign/ad_group/date/device"
+    columns:
+      - name: campaign_id
+        tests: [not_null]
+      - name: date
+        tests: [not_null]
+      - name: impressions
+        tests: [{dbt_utils.accepted_range: {min_value: 0}}]
+      - name: cost_usd
+        tests: [{dbt_utils.accepted_range: {min_value: 0}}]
+      - name: roas
+        tests: [{dbt_utils.accepted_range: {min_value: 0}}]
+
+  - name: stg_meta_ads
+    description: "Cleaned Meta Ads Insights, one row per ad/date"
+    columns:
+      - name: ad_id
+        tests: [not_null]
+      - name: date
+        tests: [not_null]
+      - name: cost_usd
+        tests: [{dbt_utils.accepted_range: {min_value: 0}}]
+
+  - name: stg_ga4_sessions
+    description: "Cleaned Google Analytics 4 session data"
+    columns:
+      - name: date
+        tests: [not_null]
+      - name: sessions
+        tests: [{dbt_utils.accepted_range: {min_value: 0}}]
+
+  - name: stg_hubspot_contacts
+    description: "Cleaned HubSpot contact records"
+    columns:
+      - name: contact_id
+        tests: [not_null, unique]
+
+  - name: stg_shopify_orders
+    description: "Cleaned Shopify order records"
+    columns:
+      - name: order_id
+        tests: [not_null, unique]
+      - name: gross_revenue
+        tests: [{dbt_utils.accepted_range: {min_value: 0}}]

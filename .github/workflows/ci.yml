@@ -1,0 +1,75 @@
+name: CI — Test & Lint
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Python Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run pytest
+        run: pytest tests/ -v --cov=etl --cov=data_quality --cov-report=xml
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install lint tools
+        run: pip install ruff
+      - name: Ruff lint
+        run: ruff check etl/ dags/ data_quality/ config/ scripts/ tests/
+
+  dbt-compile:
+    name: dbt Compile Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dbt
+        run: pip install dbt-bigquery==1.8.2
+      - name: Install dbt packages
+        working-directory: dbt
+        run: dbt deps
+      - name: dbt compile (parse only)
+        working-directory: dbt
+        env:
+          GCP_PROJECT_ID: ci-dummy-project
+          GCP_REGION: us-central1
+          BIGQUERY_DATASET_RAW: raw
+          BIGQUERY_DATASET_STAGING: staging
+          BIGQUERY_DATASET_MARTS: marts
+          GOOGLE_APPLICATION_CREDENTIALS: /dev/null
+        run: dbt parse --profiles-dir . --target dev

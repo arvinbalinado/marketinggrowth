@@ -1,0 +1,54 @@
+version: 2
+
+models:
+  - name: fct_campaign_performance
+    description: >
+      Unified daily campaign performance fact table combining Google Ads and Meta Ads.
+      One row per campaign/ad_group/date/device combination.
+    columns:
+      - name: date
+        tests: [not_null]
+      - name: campaign_id
+        tests: [not_null]
+      - name: cost_usd
+        tests: [{dbt_utils.accepted_range: {min_value: 0}}]
+      - name: roas
+        tests: [{dbt_utils.accepted_range: {min_value: 0}}]
+
+  - name: fct_ad_spend_roi
+    description: "Daily ad spend ROI summary per channel and campaign"
+    columns:
+      - name: date
+        tests: [not_null]
+      - name: performance_tier
+        tests:
+          - accepted_values:
+              values: ['high_performer', 'mid_performer', 'break_even', 'underperformer']
+
+  - name: fct_funnel_conversion
+    description: "Weekly marketing funnel conversion rates from lead to customer"
+    columns:
+      - name: week_start
+        tests: [not_null]
+      - name: lead_to_mql_rate
+        tests: [{dbt_utils.accepted_range: {min_value: 0, max_value: 1}}]
+      - name: overall_conversion_rate
+        tests: [{dbt_utils.accepted_range: {min_value: 0, max_value: 1}}]
+
+  - name: fct_revenue
+    description: "Daily revenue summary from paid Shopify orders"
+    columns:
+      - name: order_date
+        tests: [not_null]
+      - name: gross_revenue
+        tests: [{dbt_utils.accepted_range: {min_value: 0}}]
+      - name: avg_order_value
+        tests: [{dbt_utils.accepted_range: {min_value: 0}}]
+
+  - name: fct_attribution
+    description: "Channel attribution model linking sessions to revenue"
+    columns:
+      - name: date
+        tests: [not_null]
+      - name: channel
+        tests: [not_null]

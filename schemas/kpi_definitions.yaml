@@ -1,0 +1,234 @@
+# Marketing & Growth KPI Definitions
+# Single source of truth for all marketing and growth metrics.
+# Version-controlled here; referenced in dbt, dashboards, and documentation.
+
+version: "1.0"
+last_updated: "2026-04-20"
+owner: "Data Engineering"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PAID MEDIA KPIs
+# ─────────────────────────────────────────────────────────────────────────────
+paid_media:
+
+  impressions:
+    name: Impressions
+    abbreviation: IMP
+    definition: "Number of times an ad was shown to a user."
+    calculation: "SUM(impressions)"
+    data_type: integer
+    source_tables: [fct_campaign_performance]
+    good_direction: higher
+
+  clicks:
+    name: Clicks
+    abbreviation: CLK
+    definition: "Number of times users clicked on an ad."
+    calculation: "SUM(clicks)"
+    data_type: integer
+    source_tables: [fct_campaign_performance]
+    good_direction: higher
+
+  cost:
+    name: Ad Spend
+    abbreviation: SPEND
+    definition: "Total amount spent on paid advertising in USD."
+    calculation: "SUM(cost_usd)"
+    data_type: float
+    unit: USD
+    source_tables: [fct_campaign_performance, fct_ad_spend_roi]
+
+  ctr:
+    name: Click-Through Rate
+    abbreviation: CTR
+    definition: "Percentage of impressions that resulted in a click."
+    calculation: "clicks / impressions"
+    data_type: percentage
+    good_direction: higher
+    typical_benchmarks:
+      search: "3–10%"
+      display: "0.1–0.5%"
+      social: "0.5–2%"
+
+  cpc:
+    name: Cost Per Click
+    abbreviation: CPC
+    definition: "Average cost paid per ad click."
+    calculation: "cost / clicks"
+    data_type: float
+    unit: USD
+    good_direction: lower
+
+  cpm:
+    name: Cost Per Thousand Impressions
+    abbreviation: CPM
+    definition: "Cost to deliver 1,000 ad impressions."
+    calculation: "(cost / impressions) * 1000"
+    data_type: float
+    unit: USD
+    good_direction: lower
+
+  cvr:
+    name: Conversion Rate
+    abbreviation: CVR
+    definition: "Percentage of ad clicks that led to a conversion (purchase, lead, etc.)."
+    calculation: "conversions / clicks"
+    data_type: percentage
+    good_direction: higher
+
+  cpa:
+    name: Cost Per Acquisition
+    abbreviation: CPA
+    definition: "Average cost to acquire one conversion."
+    calculation: "cost / conversions"
+    data_type: float
+    unit: USD
+    good_direction: lower
+
+  roas:
+    name: Return on Ad Spend
+    abbreviation: ROAS
+    definition: "Revenue generated per dollar of ad spend."
+    calculation: "conversion_value / cost"
+    data_type: float
+    good_direction: higher
+    performance_tiers:
+      high_performer: ">= 4.0"
+      mid_performer: "2.0 – 3.99"
+      break_even: "1.0 – 1.99"
+      underperformer: "< 1.0"
+
+  roi:
+    name: Return on Investment
+    abbreviation: ROI
+    definition: "Net profit generated relative to ad spend."
+    calculation: "(conversion_value - cost) / cost"
+    data_type: percentage
+    good_direction: higher
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FUNNEL KPIs
+# ─────────────────────────────────────────────────────────────────────────────
+funnel:
+
+  leads:
+    name: Leads
+    definition: "Total number of new contacts created in the CRM."
+    calculation: "COUNT(DISTINCT contact_id)"
+    source_tables: [stg_hubspot_contacts, fct_funnel_conversion]
+    good_direction: higher
+
+  mqls:
+    name: Marketing Qualified Leads
+    abbreviation: MQL
+    definition: >
+      Leads that meet marketing qualification criteria (e.g. form fill,
+      content download, demo request) and have been passed to sales.
+    calculation: "COUNTIF(is_mql = TRUE)"
+    source_tables: [fct_funnel_conversion]
+    good_direction: higher
+
+  sqls:
+    name: Sales Qualified Leads
+    abbreviation: SQL
+    definition: "MQLs accepted and qualified by the sales team."
+    calculation: "COUNTIF(is_sql = TRUE)"
+    source_tables: [fct_funnel_conversion]
+    good_direction: higher
+
+  lead_to_mql_rate:
+    name: Lead-to-MQL Rate
+    definition: "Percentage of leads that become MQLs."
+    calculation: "mqls / leads"
+    data_type: percentage
+    good_direction: higher
+
+  mql_to_sql_rate:
+    name: MQL-to-SQL Rate
+    definition: "Percentage of MQLs accepted as SQLs by sales."
+    calculation: "sqls / mqls"
+    data_type: percentage
+    good_direction: higher
+
+  sql_to_customer_rate:
+    name: SQL-to-Customer Rate
+    definition: "Percentage of SQLs that become paying customers."
+    calculation: "customers / sqls"
+    data_type: percentage
+    good_direction: higher
+
+  overall_conversion_rate:
+    name: Overall Funnel Conversion Rate
+    definition: "Percentage of leads that become paying customers."
+    calculation: "customers / leads"
+    data_type: percentage
+    good_direction: higher
+
+# ─────────────────────────────────────────────────────────────────────────────
+# REVENUE KPIs
+# ─────────────────────────────────────────────────────────────────────────────
+revenue:
+
+  gross_revenue:
+    name: Gross Revenue
+    definition: "Total order value before discounts and taxes."
+    calculation: "SUM(gross_revenue)"
+    data_type: float
+    unit: USD
+    source_tables: [fct_revenue]
+    good_direction: higher
+
+  net_revenue:
+    name: Net Revenue
+    definition: "Gross revenue minus taxes."
+    calculation: "SUM(gross_revenue - tax_amount)"
+    data_type: float
+    unit: USD
+    source_tables: [fct_revenue]
+    good_direction: higher
+
+  aov:
+    name: Average Order Value
+    abbreviation: AOV
+    definition: "Average revenue per order."
+    calculation: "gross_revenue / order_count"
+    data_type: float
+    unit: USD
+    source_tables: [fct_revenue]
+    good_direction: higher
+
+  revenue_mom_growth:
+    name: Revenue Month-over-Month Growth
+    definition: "Percentage change in revenue vs. same month last year."
+    calculation: "(current_month_revenue - prev_month_revenue) / prev_month_revenue"
+    data_type: percentage
+    source_tables: [fct_revenue]
+    good_direction: higher
+
+# ─────────────────────────────────────────────────────────────────────────────
+# WEB ANALYTICS KPIs
+# ─────────────────────────────────────────────────────────────────────────────
+web_analytics:
+
+  sessions:
+    name: Sessions
+    definition: "Total website sessions from GA4."
+    calculation: "SUM(sessions)"
+    source_tables: [stg_ga4_sessions]
+    good_direction: higher
+
+  bounce_rate:
+    name: Bounce Rate
+    definition: "Percentage of sessions with no engagement."
+    calculation: "AVG(bounce_rate)"
+    data_type: percentage
+    source_tables: [stg_ga4_sessions]
+    good_direction: lower
+
+  engagement_rate:
+    name: Engagement Rate
+    definition: "Percentage of sessions where users engaged (10s+, conversion, 2+ pages)."
+    calculation: "AVG(engagement_rate)"
+    data_type: percentage
+    source_tables: [stg_ga4_sessions]
+    good_direction: higher
